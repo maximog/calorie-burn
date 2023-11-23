@@ -7,6 +7,7 @@ const Home = () => {
   const [speed, setSpeed] = useState("");
   const [distance, setDistance] = useState("");
   const [weight, setWeight] = useState("");
+  const [unitSystem, setUnitSystem] = useState<"metric" | "imperial">("metric"); // 'metric' or 'imperial'
   const [caloriesBurned, setCaloriesBurned] = useState<number>(0);
 
   const calculateCalories = () => {
@@ -14,6 +15,7 @@ const Home = () => {
     const speedValue = parseFloat(speed);
     const distanceValue = parseFloat(distance);
     const weightValue = parseFloat(weight);
+    const isMetricSystem = unitSystem === "metric";
 
     // Check if inputs are valid numbers
     if (isNaN(speedValue) || isNaN(distanceValue) || isNaN(weightValue)) {
@@ -22,7 +24,7 @@ const Home = () => {
     }
 
     // Convert speed to mph
-    const speedMph = speedValue / 1.60934;
+    const speedMph = isMetricSystem ? speedValue / 1.60934 : speedValue;
 
     // Use the provided formulas for calorie calculation
     let caloriesFormula;
@@ -46,9 +48,13 @@ const Home = () => {
         return;
     }
 
+    const parsedWeight = isMetricSystem ? weightValue * 2.2 : weightValue;
+    const parsedDistance = isMetricSystem
+      ? distanceValue / 1.60934
+      : distanceValue;
+
     // Calculate calories burned
-    const caloriesBurnedValue =
-      (caloriesFormula * weightValue * 2.2 * distanceValue) / 1.60934;
+    const caloriesBurnedValue = caloriesFormula * parsedWeight * parsedDistance;
 
     setCaloriesBurned(caloriesBurnedValue);
   };
@@ -60,16 +66,23 @@ const Home = () => {
     setCaloriesBurned(0);
   };
 
+  const handleUnitSystemChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    setUnitSystem(event.target.value as "metric" | "imperial");
+    setCaloriesBurned(0);
+  };
+
   return (
     <div className="max-w-md mx-auto mt-10 p-6 bg-white border rounded-md shadow-md">
-      <h2 className="text-2xl font-semibold mb-4">Calorie Calculator</h2>
+      <h2 className="text-2xl font-semibold mb-4">Calorie Burn Calculator</h2>
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-600">
           Activity:
         </label>
         <select
           value={activity}
-          onChange={(e) => handleActivityChange(e)}
+          onChange={handleActivityChange}
           className="mt-1 p-2 border rounded-md w-full"
         >
           <option value="running">Running</option>
@@ -80,7 +93,20 @@ const Home = () => {
       </div>
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-600">
-          Speed (kph):
+          Unit System:
+        </label>
+        <select
+          value={unitSystem}
+          onChange={handleUnitSystemChange}
+          className="mt-1 p-2 border rounded-md w-full"
+        >
+          <option value="metric">Metric</option>
+          <option value="imperial">Imperial</option>
+        </select>
+      </div>
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-600">
+          Speed ({unitSystem === "metric" ? "kph" : "mph"}):
         </label>
         <input
           type="text"
@@ -91,7 +117,7 @@ const Home = () => {
       </div>
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-600">
-          Distance (km):
+          Distance ({unitSystem === "metric" ? "km" : "miles"}):
         </label>
         <input
           type="text"
@@ -102,7 +128,7 @@ const Home = () => {
       </div>
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-600">
-          Weight (kg):
+          Weight ({unitSystem === "metric" ? "kg" : "lbs"}):
         </label>
         <input
           type="text"
@@ -118,7 +144,7 @@ const Home = () => {
         Calculate
       </button>
       <div className="mt-4">
-        {!!caloriesBurned && (
+        {Boolean(caloriesBurned) && (
           <p className="text-green-600">
             Calories burned for {activity}: {caloriesBurned.toFixed(0)} kcal
           </p>
