@@ -53,6 +53,13 @@ const Home = () => {
     setCaloriesBurned(caloriesBurnedValue);
   };
 
+  const handleActivityChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    setActivity(event.target.value);
+    setCaloriesBurned(0);
+  };
+
   return (
     <div className="max-w-md mx-auto mt-10 p-6 bg-white border rounded-md shadow-md">
       <h2 className="text-2xl font-semibold mb-4">Calorie Calculator</h2>
@@ -62,7 +69,7 @@ const Home = () => {
         </label>
         <select
           value={activity}
-          onChange={(e) => setActivity(e.target.value)}
+          onChange={(e) => handleActivityChange(e)}
           className="mt-1 p-2 border rounded-md w-full"
         >
           <option value="running">Running</option>
@@ -111,9 +118,9 @@ const Home = () => {
         Calculate
       </button>
       <div className="mt-4">
-        {caloriesBurned !== null && (
+        {!!caloriesBurned && (
           <p className="text-green-600">
-            Calories burned for {activity}: {caloriesBurned.toFixed(2)} kcal
+            Calories burned for {activity}: {caloriesBurned.toFixed(0)} kcal
           </p>
         )}
       </div>
